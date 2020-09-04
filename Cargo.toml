@@ -9,3 +9,6 @@ edition = "2018"
 [dependencies]
 hueclient = "0.3.9"    # Rust library for Philips Hue lights
 config = "0.10.1"                  # Layered configuration system for Rust applications.
+reqwest = { version = "0.10", features = ["json"] }
+tokio = { version = "0.2", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }                              # A generic serialization/deserialization framework
