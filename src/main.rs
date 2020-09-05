@@ -1,28 +1,43 @@
+use config::{Config, ConfigError, File};
 use hueclient::bridge::Bridge;
 use hueclient::HueError;
 use serde::Deserialize;
 use tint::Color;
 
-const LIGHT_ID: usize = 2;
-const SENSOR: u16 = 39051;
-const USER_ID: &str = "yw9QQxnYjVoFqUVxq9uFK-WyAAmpgUByYXXH5KTm";
-
 fn main() {
     let mut bridge = Bridge::discover_required();
     println!("bridge {:#?}", bridge);
+
+    let Settings {
+        user_id,
+        sensor_id,
+        light_id,
+    } = match Settings::new() {
+        Ok(settings) => settings,
+        Err(why) => panic!("{:?}", why),
+    };
+
     //let user = match register_user(&bridge) {
     //    Err(why) => panic!("{:?}", why),
     //    Ok(user) => user,
     //};
     //println!("username {}", user);
-    bridge = bridge.with_user(USER_ID.into());
+    bridge = bridge.with_user(user_id.into());
     let lights = match bridge.get_all_lights() {
         Err(why) => panic!("{:?}", why),
         Ok(lights) => lights,
     };
     println!("lights {:?}", lights);
+    for light in lights.iter() {
+        if light.id == light_id {
+            if !light.light.state.on {
+                panic!("light is off");
+            }
+            break;
+        }
+    }
 
-    let purpleair_response = match get_purple_air_for_sensor(SENSOR) {
+    let purpleair_response = match get_purple_air_for_sensor(sensor_id) {
         Err(why) => panic!("{:?}", why),
         Ok(purpleair_response) => purpleair_response,
     };
@@ -37,7 +52,7 @@ fn main() {
         .with_hue((hue * 65535.0 / 360.0) as u16)
         .with_sat((sat * 255.0) as u8)
         .with_bri((bri * 255.0) as u8);
-    if let Err(why) = bridge.set_light_state(LIGHT_ID, &command) {
+    if let Err(why) = bridge.set_light_state(light_id, &command) {
         panic!("{:?}", why);
     };
 }
@@ -93,20 +108,22 @@ impl PurpleairResponse {
 
     // aqi is based on the computations listed on https://docs.google.com/document/d/15ijz94dXJ-YAZLi9iZ_RaBwrZ4KtYeCy08goGBwnbCU/edit
     fn aqi(&self) -> Option<f64> {
-        let (Cp, lh, ll, BPh, BPl) = match self.lrapa_pm25() {
-            pm if pm > 350.5 => (pm, 500.0, 401.0, 500.0, 350.5),
-            pm if pm > 250.5 => (pm, 400.0, 301.0, 350.4, 250.5),
-            pm if pm > 150.5 => (pm, 300.0, 201.0, 250.4, 150.5),
-            pm if pm > 55.5 => (pm, 200.0, 151.0, 150.4, 55.5),
-            pm if pm > 35.5 => (pm, 150.0, 101.0, 55.4, 35.5),
-            pm if pm > 12.1 => (pm, 100.0, 51.0, 35.4, 12.1),
-            pm if pm >= 0.0 => (pm, 50.0, 0.0, 12.0, 0.0),
-            _ => return None,
-        };
-        let a = lh - ll;
-        let b = BPh - BPl;
-        let c = Cp - BPl;
-        return Some(a / b * c + ll);
+        let (pm, aqi_upperbound, aqi_lowerbound, pm25_upperbound, pm25_lowerbound) =
+            match self.lrapa_pm25() {
+                pm if pm > 350.5 => (pm, 500.0, 401.0, 500.0, 350.5),
+                pm if pm > 250.5 => (pm, 400.0, 301.0, 350.4, 250.5),
+                pm if pm > 150.5 => (pm, 300.0, 201.0, 250.4, 150.5),
+                pm if pm > 55.5 => (pm, 200.0, 151.0, 150.4, 55.5),
+                pm if pm > 35.5 => (pm, 150.0, 101.0, 55.4, 35.5),
+                pm if pm > 12.1 => (pm, 100.0, 51.0, 35.4, 12.1),
+                pm if pm >= 0.0 => (pm, 50.0, 0.0, 12.0, 0.0),
+                _ => return None,
+            };
+        // The idea here is to figure out which band of AQI we're in, linerally interpolate that
+        // band and then figure out where our current pm25 reading lands on that interpolation.
+        let m = (aqi_upperbound - aqi_lowerbound) / (pm25_upperbound - pm25_lowerbound);
+        let x = pm - pm25_lowerbound;
+        return Some(m * x + aqi_lowerbound);
     }
 
     fn hue(&self) -> Option<Color> {
@@ -128,5 +145,20 @@ impl PurpleairResponse {
 impl PurpleAirResult {
     fn pm25(&self) -> Result<f64, std::num::ParseFloatError> {
         self.pm25_value.parse::<f64>()
+    }
+}
+
+#[derive(Debug, Deserialize)]
+struct Settings {
+    light_id: usize,
+    sensor_id: u16,
+    user_id: String,
+}
+
+impl Settings {
+    fn new() -> Result<Self, ConfigError> {
+        let mut s = Config::new();
+        s.merge(File::with_name("settings"))?;
+        s.try_into()
     }
 }
