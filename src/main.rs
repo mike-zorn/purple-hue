@@ -1,7 +1,9 @@
 use config::{Config, ConfigError, File};
+use dirs;
 use hueclient::bridge::Bridge;
 use hueclient::HueError;
 use serde::Deserialize;
+use std::path::PathBuf;
 use tint::Color;
 
 fn main() {
@@ -158,7 +160,13 @@ struct Settings {
 impl Settings {
     fn new() -> Result<Self, ConfigError> {
         let mut s = Config::new();
-        s.merge(File::with_name("settings"))?;
+        s.merge(File::with_name("/etc/purple-hue").required(false))?;
+        if let Some(config_dir) = dirs::config_dir() {
+            if let Some(config_dir_str) = config_dir.join(PathBuf::from("purple-hue")).to_str() {
+                s.merge(File::with_name(config_dir_str).required(false))?;
+            }
+        }
+        s.merge(File::with_name("purple-hue").required(false))?;
         s.try_into()
     }
 }
