@@ -1,6 +1,7 @@
 use hueclient::bridge::Bridge;
 use hueclient::HueError;
 use serde::Deserialize;
+use tint::Color;
 
 const LIGHT_ID: usize = 2;
 const SENSOR: u16 = 39051;
@@ -20,16 +21,25 @@ fn main() {
         Ok(lights) => lights,
     };
     println!("lights {:?}", lights);
-    let command = hueclient::bridge::CommandLight::default().with_hue(25500);
-    if let Err(why) = bridge.set_light_state(LIGHT_ID, &command) {
-        panic!("{:?}", why);
-    };
 
     let purpleair_response = match get_purple_air_for_sensor(SENSOR) {
         Err(why) => panic!("{:?}", why),
         Ok(purpleair_response) => purpleair_response,
     };
     println!("aqi {}", purpleair_response.aqi().unwrap());
+
+    let color = purpleair_response.hue().unwrap();
+    println!("color {:?}", color);
+
+    let (hue, sat, bri) = color.to_hsv();
+    println!("hue {} sat {} bri {}", hue, sat, bri);
+    let command = hueclient::bridge::CommandLight::default()
+        .with_hue((hue * 65535.0 / 360.0) as u16)
+        .with_sat((sat * 255.0) as u8)
+        .with_bri((bri * 255.0) as u8);
+    if let Err(why) = bridge.set_light_state(LIGHT_ID, &command) {
+        panic!("{:?}", why);
+    };
 }
 
 fn get_purple_air_for_sensor(
@@ -69,7 +79,7 @@ struct PurpleAirResult {
 }
 
 impl PurpleairResponse {
-    fn pm25(self) -> f64 {
+    fn pm25(&self) -> f64 {
         self.results.iter().fold(0.0, |acc, r| match r.pm25() {
             Ok(pm25) => acc + pm25,
             Err(_) => acc,
@@ -77,12 +87,12 @@ impl PurpleairResponse {
     }
 
     // lrapa conversion from http://lar.wsu.edu/nw-airquest/docs/20200610_meeting/NWAQ_20200611_1030_Hadley.pdf
-    fn lrapa_pm25(self) -> f64 {
+    fn lrapa_pm25(&self) -> f64 {
         0.5 * self.pm25() - 0.66
     }
 
     // aqi is based on the computations listed on https://docs.google.com/document/d/15ijz94dXJ-YAZLi9iZ_RaBwrZ4KtYeCy08goGBwnbCU/edit
-    fn aqi(self) -> Option<f64> {
+    fn aqi(&self) -> Option<f64> {
         let (Cp, lh, ll, BPh, BPl) = match self.lrapa_pm25() {
             pm if pm > 350.5 => (pm, 500.0, 401.0, 500.0, 350.5),
             pm if pm > 250.5 => (pm, 400.0, 301.0, 350.4, 250.5),
@@ -97,6 +107,21 @@ impl PurpleairResponse {
         let b = BPh - BPl;
         let c = Cp - BPl;
         return Some(a / b * c + ll);
+    }
+
+    fn hue(&self) -> Option<Color> {
+        if let Some(aqi) = self.aqi() {
+            let c = match aqi {
+                aqi if aqi > 300.0 => Color::from("maroon"),
+                aqi if aqi > 200.0 => Color::from("purple"),
+                aqi if aqi > 150.0 => Color::from("red"),
+                aqi if aqi > 100.0 => Color::from("orange"),
+                aqi if aqi > 50.0 => Color::from("yellow"),
+                _ => Color::from("green"),
+            };
+            return Some(c);
+        }
+        None
     }
 }
 
