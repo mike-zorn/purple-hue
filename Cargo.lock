@@ -990,7 +990,7 @@ dependencies = [
 
 [[package]]
 name = "purple-hue"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "config",
  "dirs",
