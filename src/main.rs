@@ -60,10 +60,7 @@ fn main() -> CliResult {
     }
 
     info!("fetching aqi from purple air sensor, {}", sensor_id);
-    let purpleair_response = match purple_air::PurpleairResponse::for_sensor(sensor_id) {
-        Err(why) => panic!("{:?}", why),
-        Ok(purpleair_response) => purpleair_response,
-    };
+    let purpleair_response = purple_air::PurpleairResponse::for_sensor(sensor_id)?;
     info!("aqi {}", purpleair_response.aqi().unwrap());
 
     let color = purpleair_response.hue().unwrap();
