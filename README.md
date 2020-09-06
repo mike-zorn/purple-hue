@@ -1,19 +1,22 @@
 # purple-hue
-Change a hue light's color based on air quality data from purple air
+Change a hue light's color based on air quality data from purple air.
 
-## TODO
+## Installation
 
-- [x] Read settings file for user name
-- [x] Read settings file for light name
-- [x] set light to a color
-- [x] Get air quality from purple air via [this](https://github.com/mrsharpoblunto/purple-rain/blob/master/index.js#L103)
-- [x] Convert purple air readings to AQI via [this](https://docs.google.com/document/d/15ijz94dXJ-YAZLi9iZ_RaBwrZ4KtYeCy08goGBwnbCU/edit)
+### Cargo
+```
+cargo install purple-hue
+```
 
-- [x] ~~Read correction factors from settings file~~
-- [x] actually set the light based on purple air
-- [x] Split into multiple files
-- [x] Use some kind of logger utility instead of panicking in main everywhere
-- [x] create second utility for adding the user name to the settings file
-- [x] use [systemd timers](https://medium.com/horrible-hacks/using-systemd-as-a-better-cron-a4023eea996d) to run on an interval
-- [ ] create PKGBUILD to build this for arch
-- [ ] upload to AUR
+## Configuration
+In order to run purple-hue, you need to configure a sensor, light and register a user.
+
+You can find the sensor id from the [purple air map](https://www.purpleair.com/map). The light id is available through [these instructions](https://developers.meethue.com/develop/get-started-2/#turning-a-light-on-and-off). Finally, you can register a user via `purple-hue register-user`. Save all of these in a `purple-hue.toml` file either at `/etc/purple-hue.toml`, `./purple-hue.toml` or `$XDG_CONFIG/purple-hue.toml`. An example configuration follows.
+```
+light_id = 1
+sensor_id = 1
+user_id = "user-id"
+```
+
+### Systemd
+This repository has a systemd unit and timer that can be used to run this as a systemd service every minute.
