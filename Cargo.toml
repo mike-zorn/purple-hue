@@ -12,6 +12,7 @@ dirs = "1.0.4"
 hueclient = "0.3.9"
 log = "0.4"
 quicli = "0.4"
+failure = "0.1"
 reqwest = { version = "0.10", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 structopt = "0.2"

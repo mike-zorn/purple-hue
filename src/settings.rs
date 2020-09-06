@@ -1,13 +1,25 @@
+use config::{Config, ConfigError, File};
+use dirs;
+use serde::Deserialize;
+use std::path::PathBuf;
+
 #[derive(Debug, Deserialize)]
-struct Settings {
-    username: String,
+pub struct Settings {
+    pub light_id: usize,
+    pub sensor_id: u16,
+    pub user_id: String,
 }
 
 impl Settings {
     pub fn new() -> Result<Self, ConfigError> {
-
-    let mut config = Config::default();
-    config.merge(File::with_name("Settings")).unwrap();
-    config.try_into()
+        let mut s = Config::new();
+        s.merge(File::with_name("/etc/purple-hue").required(false))?;
+        if let Some(config_dir) = dirs::config_dir() {
+            if let Some(config_dir_str) = config_dir.join(PathBuf::from("purple-hue")).to_str() {
+                s.merge(File::with_name(config_dir_str).required(false))?;
+            }
+        }
+        s.merge(File::with_name("purple-hue").required(false))?;
+        s.try_into()
     }
 }

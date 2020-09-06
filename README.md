@@ -11,9 +11,9 @@ Change a hue light's color based on air quality data from purple air
 
 - [x] ~~Read correction factors from settings file~~
 - [x] actually set the light based on purple air
-- [ ] Split into multiple files
-- [ ] Use some kind of logger utility instead of panicking in main everywhere
-- [ ] create second utility for adding the user name to the settings file
+- [x] Split into multiple files
+- [x] Use some kind of logger utility instead of panicking in main everywhere
+- [x] create second utility for adding the user name to the settings file
 - [x] use [systemd timers](https://medium.com/horrible-hacks/using-systemd-as-a-better-cron-a4023eea996d) to run on an interval
 - [ ] create PKGBUILD to build this for arch
 - [ ] upload to AUR
