@@ -4,7 +4,6 @@ version = "0.1.0"
 authors = ["Mike Zorn <apechimp@icloud.com>"]
 edition = "2018"
 description = "Change a hue light's color based on air quality data from purple air."
-license = "GPLv3"
 license-file = "LICENSE"
 repository = "https://github.com/apechimp/purple-hue"
 
