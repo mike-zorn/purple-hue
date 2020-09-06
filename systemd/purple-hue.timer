@@ -1,0 +1,10 @@
+[Unit]
+Description=Run purple-hue every minute
+Requires=purple-hue.service
+
+[Timer]
+Unit=purple-hue.service
+OnUnitInactiveSec=1m
+
+[Install]
+WantedBy=timers.target
