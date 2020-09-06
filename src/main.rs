@@ -2,34 +2,47 @@ use config::{Config, ConfigError, File};
 use dirs;
 use hueclient::bridge::Bridge;
 use hueclient::HueError;
+use log::info;
+use quicli::prelude::*;
 use serde::Deserialize;
 use std::path::PathBuf;
+use structopt::StructOpt;
 use tint::Color;
 
-fn main() {
-    let mut bridge = Bridge::discover_required();
-    println!("bridge {:#?}", bridge);
+#[derive(Debug, StructOpt)]
+struct Cli {
+    #[structopt(flatten)]
+    verbosity: Verbosity,
+}
+
+fn main() -> CliResult {
+    let args = Cli::from_args();
+    args.verbosity.setup_env_logger("purple-hue")?;
+
+    let mut bridge = match Bridge::discover() {
+        Some(bridge) => bridge,
+        None => return Err(err_msg("unable to discover a bridge").into()),
+    };
+    info!("bridge {:#?}", bridge);
 
     let Settings {
         user_id,
         sensor_id,
         light_id,
-    } = match Settings::new() {
-        Ok(settings) => settings,
-        Err(why) => panic!("{:?}", why),
-    };
+    } = Settings::new()?;
 
     //let user = match register_user(&bridge) {
     //    Err(why) => panic!("{:?}", why),
     //    Ok(user) => user,
     //};
     //println!("username {}", user);
+    info!("fetching lights");
     bridge = bridge.with_user(user_id.into());
     let lights = match bridge.get_all_lights() {
         Err(why) => panic!("{:?}", why),
         Ok(lights) => lights,
     };
-    println!("lights {:?}", lights);
+    info!("lights {:?}", lights);
     for light in lights.iter() {
         if light.id == light_id {
             if !light.light.state.on {
@@ -39,17 +52,19 @@ fn main() {
         }
     }
 
+    info!("fetching aqi from purple air sensor, {}", sensor_id);
     let purpleair_response = match get_purple_air_for_sensor(sensor_id) {
         Err(why) => panic!("{:?}", why),
         Ok(purpleair_response) => purpleair_response,
     };
-    println!("aqi {}", purpleair_response.aqi().unwrap());
+    info!("aqi {}", purpleair_response.aqi().unwrap());
 
     let color = purpleair_response.hue().unwrap();
-    println!("color {:?}", color);
+    info!("color {:?}", color);
 
     let (hue, sat, bri) = color.to_hsv();
-    println!("hue {} sat {} bri {}", hue, sat, bri);
+    info!("hue {} sat {} bri {}", hue, sat, bri);
+
     let command = hueclient::bridge::CommandLight::default()
         .with_hue((hue * 65535.0 / 360.0) as u16)
         .with_sat((sat * 255.0) as u8)
@@ -57,6 +72,7 @@ fn main() {
     if let Err(why) = bridge.set_light_state(light_id, &command) {
         panic!("{:?}", why);
     };
+    Ok(())
 }
 
 fn get_purple_air_for_sensor(
@@ -64,7 +80,7 @@ fn get_purple_air_for_sensor(
 ) -> Result<PurpleairResponse, Box<dyn std::error::Error>> {
     let url = format!("https://www.purpleair.com/json?show={}", sensor_id);
     let resp = reqwest::blocking::get(&url)?.json::<PurpleairResponse>()?;
-    println!("{:#?}", resp);
+    info!("{:#?}", resp);
     Ok(resp)
 }
 
