@@ -3,7 +3,7 @@ Description=Sets a hue light to a color based on the air quality
 Wants=purple-hue.timer
 
 [Service]
-ExecStart=/usr/local/bin/purple-hue
+ExecStart=/usr/bin/purple-hue
 
 [Install]
 WantedBy=multi-user.target
