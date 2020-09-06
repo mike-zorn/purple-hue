@@ -8,6 +8,10 @@ Change a hue light's color based on air quality data from purple air.
 cargo install purple-hue
 ```
 
+### ArchLinux
+
+[`purple-hue`](https://aur.archlinux.org/packages/purple-hue/) is in the [AUR](https://wiki.archlinux.org/index.php/Arch_User_Repository#Installing_and_upgrading_packages).
+
 ## Configuration
 In order to run purple-hue, you need to configure a sensor, light and register a user.
 
