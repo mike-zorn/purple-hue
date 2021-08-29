@@ -17,7 +17,7 @@ struct PurpleAirResult {
 }
 
 impl PurpleairResponse {
-    pub fn for_sensor(sensor_id: u16) -> Result<PurpleairResponse, Error> {
+    pub fn for_sensor(sensor_id: u32) -> Result<PurpleairResponse, Error> {
         let url = format!("https://www.purpleair.com/json?show={}", sensor_id);
         let resp = reqwest::blocking::get(&url)?.json::<PurpleairResponse>()?;
         info!("{:#?}", resp);

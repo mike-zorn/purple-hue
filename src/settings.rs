@@ -6,7 +6,7 @@ use std::path::PathBuf;
 #[derive(Debug, Deserialize)]
 pub struct Settings {
     pub light_id: usize,
-    pub sensor_id: u16,
+    pub sensor_id: u32,
     pub user_id: String,
 }
 
