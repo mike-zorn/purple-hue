@@ -33,8 +33,6 @@ This repository has a systemd unit and timer that can be used to run this as a s
 The following instructions are for deploying updates to this repository to crates.io and to the Arch User Repository.
 
 1. Identify the new tag version you'll use for the Release
-2. Update the pkgver variable in the PKGBUILD
-3. Update the version in Cargo.toml
-4. 
+2. Update the version in Cargo.toml
 3. Create a new git tag and push it to the origin repository.
 4. `cargo publish`

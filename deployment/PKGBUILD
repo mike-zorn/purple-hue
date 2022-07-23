@@ -8,9 +8,7 @@ provides=('purple-hue')
 makedepends=('cargo')
 arch=('x86_64')
 url="https://github.com/mike-zorn/purple-hue"
-source=("$pkgname-$pkgver.tar.gz::https://github.com/mike-zorn/purple-hue/archive/$pkgver.tar.gz")
 license=('GPL')
-sha512sums=('b0d5026b4562458b83b138600fd4d9da7749a70b1dd814cdcc5ee1228a02fddeee43b51b76cc88107a8210bf49bf78249aba3fe34cf3d198c9a4c13789e72405')
 
 build() {
     cd $pkgname-$pkgver
