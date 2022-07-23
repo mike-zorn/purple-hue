@@ -1,11 +1,11 @@
 [package]
 name = "purple-hue"
-version = "0.1.4"
+version = "0.2.0"
 authors = ["Mike Zorn <apechimp@icloud.com>"]
 edition = "2018"
 description = "Change a hue light's color based on air quality data from purple air."
 license-file = "LICENSE"
-repository = "https://github.com/apechimp/purple-hue"
+repository = "https://github.com/mike-zorn/purple-hue"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

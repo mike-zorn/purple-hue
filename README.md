@@ -1,7 +1,7 @@
 # purple-hue
 Change a hue light's color based on air quality data from purple air.
 
-![Rust](https://github.com/apechimp/purple-hue/workflows/Rust/badge.svg)
+![Rust](https://github.com/mike-zorn/purple-hue/workflows/Rust/badge.svg)
 
 ## Installation
 
@@ -28,3 +28,13 @@ Instead of providing a `sensor_id`, you can also set a `sensor_ip` if you are ab
 
 ### Systemd
 This repository has a systemd unit and timer that can be used to run this as a systemd service every minute.
+
+## Release
+The following instructions are for deploying updates to this repository to crates.io and to the Arch User Repository.
+
+1. Identify the new tag version you'll use for the Release
+2. Update the pkgver variable in the PKGBUILD
+3. Update the version in Cargo.toml
+4. 
+3. Create a new git tag and push it to the origin repository.
+4. `cargo publish`
