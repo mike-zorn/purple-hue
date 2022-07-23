@@ -1,17 +1,11 @@
 use tint::Color;
 
-trait PM25Value {
+pub trait Aqi {
     fn pm25(&self) -> f64;
-}
-
-struct Aqi {
-    pm25_value: PM25Value,
-}
-
-impl Aqi {
+    
     // lrapa conversion from http://lar.wsu.edu/nw-airquest/docs/20200610_meeting/NWAQ_20200611_1030_Hadley.pdf
     fn lrapa_pm25(&self) -> Option<f64> {
-        match 0.5 * self.pm25_value.pm25() - 0.66 {
+        match 0.5 * self.pm25() - 0.66 {
             adj_pm25 if adj_pm25 >= 0.0 => Some(adj_pm25),
             adj_pm25 if adj_pm25 >= -0.66 => Some(0.0),
             _ => return None, // more negative than the adjustment could cause. This is invalid, so None.
@@ -19,7 +13,7 @@ impl Aqi {
     }
 
     // aqi is based on the computations listed on https://docs.google.com/document/d/15ijz94dXJ-YAZLi9iZ_RaBwrZ4KtYeCy08goGBwnbCU/edit
-    pub fn aqi(&self) -> Option<f64> {
+    fn aqi(&self) -> Option<f64> {
         let (pm, aqi_upperbound, aqi_lowerbound, pm25_upperbound, pm25_lowerbound) =
             match self.lrapa_pm25() {
                 Some(pm) if pm > 350.5 => (pm, 500.0, 401.0, 500.0, 350.5),
@@ -38,7 +32,7 @@ impl Aqi {
         return Some(m * x + aqi_lowerbound);
     }
 
-    pub fn hue(&self) -> Option<Color> {
+    fn hue(&self) -> Option<Color> {
         if let Some(aqi) = self.aqi() {
             let c = match aqi {
                 aqi if aqi > 300.0 => Color::from("maroon"),

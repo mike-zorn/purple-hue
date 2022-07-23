@@ -60,11 +60,22 @@ fn main() -> CliResult {
         }
     }
 
-    info!("fetching aqi from purple air sensor, {}", sensor_id);
-    let purpleair_response = purple_air::PurpleairResponse::for_sensor(sensor_id)?;
-    info!("aqi {}", purpleair_response.aqi().unwrap());
+    let aqi = match (sensor_id, sensor_ip) {
+        (Some(sensor_id),None) => {
+            info!("fetching aqi from purple air sensor, {}", sensor_id);
+            purple_air::for_sensor(sensor_id).unwrap()
+        },
+        (None, Some(sensor_ip)) => {
+            info!("fetching aqi from local purple air sensor with ip, {}", sensor_ip);
+            purple_air::for_local_sensor(sensor_ip).unwrap()
+        },
+        (Some(_),Some(_)) => return Err(err_msg("both sensor ip and id specified: pick one").into()),
+        (None,None) => return Err(err_msg("no sensor id or sensor ip specified").into()),
+    };
 
-    let color = purpleair_response.hue().unwrap();
+    info!("aqi {}", aqi.aqi().unwrap());
+
+    let color = aqi.hue().unwrap();
     info!("color {:?}", color);
 
     let (hue, sat, bri) = color.to_hsv();
