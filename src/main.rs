@@ -43,6 +43,7 @@ fn main() -> CliResult {
     let settings::Settings {
         user_id,
         sensor_id,
+        sensor_ip,
         light_id,
     } = settings::Settings::new()?;
 
