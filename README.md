@@ -24,5 +24,7 @@ sensor_id = 1
 user_id = "user-id"
 ```
 
+Instead of providing a `sensor_id`, you can also set a `sensor_ip` if you are able to access the http api of a given sensor.
+
 ### Systemd
 This repository has a systemd unit and timer that can be used to run this as a systemd service every minute.
