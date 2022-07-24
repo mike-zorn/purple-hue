@@ -1,6 +1,6 @@
 [package]
 name = "purple-hue"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Mike Zorn <apechimp@icloud.com>"]
 edition = "2018"
 description = "Change a hue light's color based on air quality data from purple air."
