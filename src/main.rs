@@ -35,7 +35,7 @@ fn main() -> CliResult {
     info!("bridge {:#?}", bridge);
 
     if let Some(Command::RegisterUser) = args.cmd {
-        let user = register_user::register_user(&bridge).map_err(SyncFailure::new)?;
+        let user = register_user::register_user(&mut bridge).map_err(SyncFailure::new)?;
         println!("user_id = \"{}\"", user);
         return Ok(());
     }
