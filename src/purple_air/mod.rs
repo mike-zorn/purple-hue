@@ -46,9 +46,9 @@ impl aqi::Aqi for PurpleairResponse {
 
 #[derive(Debug, Deserialize)]
 struct LocalPurpleair {
-    #[serde(alias = "pm2.5_aqi")]
+    #[serde(alias = "p_2_5_um")]
     pm25a_value: f64,
-    #[serde(alias = "pm2.5_aqi_b")]
+    #[serde(alias = "p_2_5_um_b")]
     pm25b_value: f64,
 }
 
