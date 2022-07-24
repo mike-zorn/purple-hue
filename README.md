@@ -34,7 +34,8 @@ The following instructions are for deploying updates to this repository to crate
 
 1. Identify the new tag version you'll use for the Release
 2. Update the version in Cargo.toml
-3. Create a new git tag and push it to the origin repository.
+3. Regenerate lockfile `cargo generate-lockfile`
+3. Commit & create a new git tag and push it to the origin repository.
 4. `cargo publish`
 5. Update the pkgver in the PKGBUILD
 6. Download the tar.gz file that github generated for the tag and record the
