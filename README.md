@@ -36,3 +36,9 @@ The following instructions are for deploying updates to this repository to crate
 2. Update the version in Cargo.toml
 3. Create a new git tag and push it to the origin repository.
 4. `cargo publish`
+5. Update the pkgver in the PKGBUILD
+6. Download the tar.gz file that github generated for the tag and record the
+   sha 512 sum in the PKGBUILD
+7. Copy the updated PKGBUILD to the git repository for the AUR package
+8. `makepkg --printsrcinfo > .SRCINFO` in the AUR package repository
+9. commit the updated PKGBUILD to the AUR repository
